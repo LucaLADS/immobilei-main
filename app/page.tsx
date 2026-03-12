@@ -1,65 +1,498 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  HERO_CONTENT_CLASS,
+  HERO_FRAME_CLASS,
+  HERO_H1_BASE_CLASS,
+  HERO_HEADER_CLASS,
+  HERO_SECTION_CLASS,
+} from "@/lib/hero-layout";
+
+const featureLinks = [
+  { label: "Immobili", bgClassName: "bg-[#e48fb0]", textClassName: "text-[#161616]" },
+  { label: "Servizi", bgClassName: "bg-[#3c3fa4]", textClassName: "text-white", href: "/servizi" },
+  {
+    label: "Formazione",
+    bgClassName: "bg-[#a8c3cf]",
+    textClassName: "text-[#161616]",
+    href: "/formazione",
+  },
+  { label: "Contatti", bgClassName: "bg-[#e8e3c7]", textClassName: "text-[#161616]" },
+];
+
+const serviceCards = [
+  {
+    index: "01",
+    title: "Compravendita immobiliare",
+    description:
+      "Seguiamo la vendita e l'acquisto di immobili con un approccio chiaro e strutturato. Non ci limitiamo a pubblicare annunci: analizziamo il mercato, valorizziamo l'immobile e accompagniamo ogni fase della trattativa. Dalla prima valutazione fino al rogito, lavoriamo per rendere il processo piu semplice, sicuro e consapevole.",
+  },
+  {
+    index: "02",
+    title: "Consulenza e gestione",
+    description:
+      "L'immobiliare e fatto di decisioni importanti e spesso complesse. ImmobiLei affianca chi compra o vende con consulenze mirate, analisi dell'immobile e supporto tecnico. Coordiniamo professionisti e passaggi operativi per aiutarti a capire cosa fare, quando farlo e come farlo nel modo giusto.",
+  },
+  {
+    index: "03",
+    title: "Aggiornamento per professionisti",
+    description:
+      "Mettiamo a disposizione percorsi di aggiornamento pensati per agenti immobiliari che vogliono rafforzare competenze e metodo. Contenuti concreti, basati sull'esperienza sul campo, per affrontare con piu consapevolezza trattative, processi e dinamiche del mercato immobiliare.",
+  },
+];
+
+const properties = [
+  { title: "Villa in campagna", year: "2025", status: "In vendita", large: true },
+  { title: "Bilocale a Torino", year: "2025", status: "In vendita", large: false },
+];
+
+const HERO_RIBBON_HEIGHT = 188;
+const STICKY_RIBBON_HEIGHT = 28;
+const RIBBON_SCROLL_RANGE = 340;
+
+function PillButton({
+  children,
+  tone = "dark",
+}: {
+  children: React.ReactNode;
+  tone?: "dark" | "light" | "tinted";
+}) {
+  const toneClassName =
+    tone === "dark"
+      ? "bg-[#19191d] text-white"
+      : tone === "tinted"
+        ? "bg-[#b7cfd9] text-[#161616] ring-1 ring-[#161616]"
+        : "bg-transparent text-[#161616] ring-1 ring-[#161616]";
+
+  return (
+    <button
+      type="button"
+      className={`inline-flex min-h-12 items-center justify-center rounded-full px-7 text-[1.1rem] font-medium tracking-[-0.03em] ${toneClassName}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SectionEyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="text-[16px] font-semibold leading-normal tracking-[0em] text-[#111111]">. {children}</p>;
+}
+
+function ArrowMark({ light = false }: { light?: boolean }) {
+  return (
+    <img
+      aria-hidden="true"
+      src="/icons/freccia.svg"
+      alt=""
+      className={`block h-auto w-28 ${light ? "brightness-0 invert" : ""}`}
+    />
+  );
+}
+
+function PlaceholderVisual({ className = "" }: { className?: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-[14px] bg-[#d7d7d7] ${className}`}>
+      <div className="absolute inset-0 bg-[linear-gradient(140deg,transparent_49.7%,#4c4c4c_50%,transparent_50.3%)]" />
+    </div>
+  );
+}
+
+function ServiceCard({
+  index,
+  title,
+  description,
+}: {
+  index: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <article className="flex min-h-[24rem] w-full max-w-[33.5rem] flex-col rounded-[16px] border border-[#676767] bg-transparent px-7 py-6">
+      <div className="flex min-h-[5.5rem] items-center justify-center">
+        <div className="grid w-full grid-cols-[4.5rem_1px_minmax(0,1fr)] items-center gap-x-6 border-b border-[#b6b6b6] pb-5">
+          <div className="text-[16px] font-bold leading-normal tracking-[0em] text-[#161616]">{index}</div>
+          <div className="h-[64px] w-px justify-self-center bg-[#8a8a8a]" />
+          <h3 className="max-w-none text-[22px] font-normal leading-normal tracking-[0em] text-[#151515]">
+            {title}
+          </h3>
+        </div>
+      </div>
+      <div className="flex flex-1 items-center justify-center pt-6">
+        <p
+          className="max-w-[26rem] text-left text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]"
+          style={{ textIndent: "6.2rem" }}
+        >
+          {description}
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function PropertyCard({
+  title,
+  year,
+  status,
+  large,
+}: {
+  title: string;
+  year: string;
+  status: string;
+  large: boolean;
+}) {
+  if (large) {
+    return (
+      <article className="space-y-5">
+        <PlaceholderVisual className="aspect-[1.56/1] w-full max-w-[80%] self-start" />
+        <div className="grid w-full max-w-[80%] gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
+          <div className="pt-2">
+            <ArrowMark />
+          </div>
+          <div className="grid w-full gap-3">
+            <div className="flex items-end justify-between gap-4 border-b border-[#646464] pb-3">
+              <h3 className="text-[16px] font-semibold leading-normal tracking-[0em] text-[#151515]">{title}</h3>
+              <span className="text-[16px] font-semibold leading-normal tracking-[0em] text-[#151515]">{year}</span>
+            </div>
+            <p className="text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]">{status}</p>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="w-[92%] max-w-none justify-self-end space-y-5">
+      <PlaceholderVisual className="aspect-[1.67/1] w-full" />
+      <div className="grid w-full gap-4 lg:grid-cols-[9.5rem_minmax(0,1fr)] lg:items-start">
+        <div className="pt-2">
+          <ArrowMark />
+        </div>
+        <div className="grid w-full pl-3 gap-3">
+          <div className="flex items-end justify-between gap-4 border-b border-[#646464] pb-3">
+            <h3 className="text-[16px] font-semibold leading-normal tracking-[0em] text-[#151515]">{title}</h3>
+            <span className="text-[16px] font-semibold leading-normal tracking-[0em] text-[#151515]">{year}</span>
+          </div>
+          <p className="text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]">{status}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function BrandWordmark({ className = "" }: { className?: string }) {
+  return (
+    <div className={`font-semibold tracking-[-0.09em] text-[#161616] ${className}`}>
+      <span>immobi</span>
+      <span className="font-light italic">Lei</span>
+    </div>
+  );
+}
+
+function FeatureRibbon({ progress }: { progress: number }) {
+  const compactMode = progress > 0.92;
+  const textOpacity = Math.max(1 - progress * 1.45, 0);
+  const arrowOpacity = Math.max(1 - progress * 2.4, 0);
+  const labelTranslate = progress * -18;
+
+  return (
+    <div className="grid h-full w-full md:grid-cols-2 xl:grid-cols-4">
+      {featureLinks.map((item) => (
+        <article
+          key={item.label}
+          className={`group relative h-full overflow-visible ${item.textClassName}`}
+        >
+          <div
+            className={`pointer-events-none absolute inset-x-0 bottom-0 h-full origin-bottom ${item.bgClassName} transition-transform duration-300 ease-out group-hover:scale-y-[1.115]`}
+          />
+          {item.href ? (
+            <Link href={item.href} className="absolute inset-0 z-20 block" aria-label={item.label} />
+          ) : null}
+          {compactMode ? (
+            <div className="absolute inset-x-0 bottom-0 h-full">
+              <div
+                className={`absolute inset-x-0 bottom-0 h-full ${item.bgClassName} transition-[height] duration-300 ease-out group-hover:h-[76px]`}
+              />
+              <div className="relative z-10 h-full">
+                <div className="flex h-full items-center px-8">
+                  <span className="pointer-events-none text-[30px] font-semibold leading-[28px] tracking-[0em] opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
+                    {item.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="relative z-10 flex h-full flex-col justify-center px-8 py-[26px]"
+              style={{ gap: `${50 - progress * 30}px` }}
+            >
+              <h2
+                className="text-[30px] leading-[28px] font-semibold tracking-[0em] transition-opacity duration-200 ease-out"
+                style={{
+                  opacity: textOpacity,
+                  transform: `translateY(${labelTranslate}px)`,
+                }}
+              >
+                {item.label}
+              </h2>
+              <div
+                className="transition-opacity duration-150 ease-out"
+                style={{ opacity: arrowOpacity }}
+              >
+                <ArrowMark light={item.textClassName === "text-white"} />
+              </div>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const ribbonProgress = Math.min(scrollY / RIBBON_SCROLL_RANGE, 1);
+  const ribbonHeight =
+    HERO_RIBBON_HEIGHT - (HERO_RIBBON_HEIGHT - STICKY_RIBBON_HEIGHT) * ribbonProgress;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="bg-[#f2f2f0] text-[#161616]">
+      <div className="fixed bottom-0 left-0 right-0 z-40">
+        <div className="w-screen overflow-visible" style={{ height: `${ribbonHeight}px` }}>
+          <FeatureRibbon progress={ribbonProgress} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </div>
+
+      <section className={HERO_SECTION_CLASS}>
+        <div className={HERO_FRAME_CLASS}>
+          <header className={HERO_HEADER_CLASS}>
+            <img
+              src="/logos/logo%20%2B%20sub.svg"
+              alt="ImmobiLei"
+              className="h-auto w-[15rem] sm:w-[18rem]"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="flex items-center gap-3">
+              <PillButton tone="light">Prenota una consulenza</PillButton>
+              <button
+                type="button"
+                className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[#b7cfd9] px-7 text-[1.1rem] font-medium tracking-[-0.03em] text-[#161616] ring-1 ring-[#161616]"
+              >
+                Menu
+                <span className="flex flex-col gap-[3px]">
+                  <span className="h-[1.5px] w-4 bg-[#161616]" />
+                  <span className="h-[1.5px] w-4 bg-[#161616]" />
+                </span>
+              </button>
+            </div>
+          </header>
+
+          <div className={HERO_CONTENT_CLASS}>
+            <h1 className={`max-w-[16ch] ${HERO_H1_BASE_CLASS}`}>
+              Il mondo immobiliare, spiegato semplice
+            </h1>
+            <p className="mt-7 max-w-[46rem] text-[16px] leading-[22px] font-normal tracking-[0em] text-[#191919]">
+              Immobilei accompagna chi compra, vende o vuole valorizzare il proprio immobile con
+              consulenza, supporto operativo e professionisti specializzati.
+            </p>
+            <div className="mt-10">
+              <PillButton>scopri di piu</PillButton>
+            </div>
+          </div>
+
+          <div className="shrink-0" style={{ height: `${ribbonHeight}px` }} />
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="px-[30px] py-20 lg:py-28">
+        <div className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
+          <SectionEyebrow>chi siamo</SectionEyebrow>
+          <div className="space-y-12">
+            <p
+              className="w-full max-w-none text-[42px] leading-[50px] font-light tracking-[0em] text-[#111111]"
+              style={{ textIndent: "8.2rem" }}
+            >
+              Eliminiamo gli ostacoli tra te e la tua casa dei sogni, ImmobiLei non e soltanto uno
+              studio di consulenza immobiliare, ma il punto di partenza per trovare la tua casa
+              ideale. Dall&apos;acquisto della tua prima proprieta, alla strategia per la vendita del
+              tuo vecchio immobile, passando per la valutazione del tuo investimento: tutto questo e
+              ImmobiLei.
+            </p>
+            <PillButton>scopri chi siamo</PillButton>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-[30px] py-20 lg:py-28">
+        <div className="grid w-full gap-12 lg:grid-cols-[11rem_minmax(34rem,1fr)_minmax(28rem,31.5rem)] xl:gap-16">
+          <SectionEyebrow>cosa facciamo</SectionEyebrow>
+          <div className="flex h-full flex-col">
+            <div className="grid content-start gap-10">
+              <h2 className="max-w-none text-[50px] font-medium leading-[58px] tracking-[0em]">
+                <span className="block whitespace-nowrap">Un supporto immobiliare</span>
+                <span className="block whitespace-nowrap">piu completo</span>
+              </h2>
+              <p
+                className="max-w-[39rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]"
+                style={{ textIndent: "6.2rem" }}
+              >
+                Immobilei nasce per rendere il percorso immobiliare piu chiaro e gestibile. Che si
+                tratti di comprare, vendere o orientarsi tra dubbi e decisioni importanti, offriamo
+                un supporto concreto fatto di esperienza, metodo e professionisti qualificati. Il
+                nostro lavoro si sviluppa su tre aree principali: intermediazione immobiliare,
+                consulenza dedicata e aggiornamento professionale. Tre pilastri diversi, ma uniti
+                dallo stesso obiettivo: aiutare le persone e i professionisti a muoversi nel mercato
+                immobiliare con piu consapevolezza.
+              </p>
+              <div className="pt-3">
+                <PillButton>scopri chi siamo</PillButton>
+              </div>
+            </div>
+            <PlaceholderVisual className="mt-10 aspect-[1/1.28] w-full max-w-[30rem] self-start lg:mt-auto lg:ml-[-14rem]" />
+          </div>
+          <div className="justify-self-end space-y-8">
+            {serviceCards.map((card) => (
+              <ServiceCard key={card.index} {...card} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-[30px] py-20 lg:py-28">
+        <div className="grid w-full gap-14 lg:grid-cols-[14rem_minmax(32rem,1fr)_minmax(24rem,1fr)]">
+          <SectionEyebrow>come lavoriamo</SectionEyebrow>
+          <div className="space-y-10">
+            <h2 className="max-w-none text-[50px] font-medium leading-[58px] tracking-[0em]">
+              <span className="block whitespace-nowrap">Una storia di fiducia</span>
+              <span className="block whitespace-nowrap">e competenza</span>
+            </h2>
+            <p
+              className="max-w-[42rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]"
+              style={{ textIndent: "6.2rem" }}
+            >
+              Ogni percorso immobiliare e diverso, ma una cosa non cambia mai: per prendere
+              decisioni giuste servono chiarezza, metodo e il supporto delle persone giuste. Per
+              questo ImmobiLei non si limita a intervenire in un singolo momento, ma accompagna il
+              cliente lungo tutto il processo, aiutandolo a capire, valutare e agire con maggiore
+              consapevolezza. Il nostro lavoro parte dall&apos;ascolto e si costruisce passo dopo passo,
+              con un approccio concreto, diretto e sempre orientato alla soluzione.
+            </p>
+            <PillButton>scopri di piu</PillButton>
+          </div>
+          <PlaceholderVisual className="aspect-[1/1.28] w-full max-w-[30rem] justify-self-end" />
+        </div>
+      </section>
+
+      <section className="px-[30px] py-20 lg:py-28">
+        <div className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
+          <SectionEyebrow>i servizi</SectionEyebrow>
+          <div className="w-full space-y-12">
+            <p
+              className="w-full max-w-none text-[42px] font-light leading-[50px] tracking-[0em] text-[#111111]"
+              style={{ textIndent: "8.2rem" }}
+            >
+              Ogni immobile ha una storia diversa e ogni persona affronta il mercato immobiliare con
+              esigenze specifiche. C&apos;e chi deve vendere, chi sta cercando casa, chi ha dubbi su
+              come gestire un immobile o su quali decisioni prendere. In queste situazioni avere un
+              riferimento chiaro puo fare davvero la differenza.
+            </p>
+            <p
+              className="w-full max-w-none text-[42px] font-light leading-[50px] tracking-[0em] text-[#111111]"
+              style={{ textIndent: "8.2rem" }}
+            >
+              I servizi di Immobilei nascono proprio per accompagnare le persone in questi
+              passaggi. Non si tratta solo di intermediazione, ma di un supporto piu ampio che
+              aiuta a leggere meglio il mercato, comprendere il valore dell&apos;immobile e affrontare
+              ogni fase del percorso con maggiore consapevolezza.
+            </p>
+            <p
+              className="w-full max-w-none text-[42px] font-light leading-[50px] tracking-[0em] text-[#111111]"
+              style={{ textIndent: "8.2rem" }}
+            >
+              Attraverso consulenze dedicate, analisi e affiancamento operativo, aiutiamo chi si
+              trova davanti a una scelta immobiliare a orientarsi con piu sicurezza, evitando errori
+              e perdite di tempo. Perche spesso la differenza non sta solo nel risultato finale, ma
+              nel modo in cui si arriva a raggiungerlo.
+            </p>
+            <PillButton>scopri i servizi</PillButton>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-[30px] py-20 lg:py-28">
+        <div className="w-full">
+          <div className="mb-10">
+            <SectionEyebrow>immobili</SectionEyebrow>
+          </div>
+          <div className="grid gap-14 xl:grid-cols-[1.02fr_0.82fr] xl:items-start">
+            {properties.map((property) => (
+              <PropertyCard key={property.title} {...property} />
+            ))}
+          </div>
+          <div className="mt-20 flex flex-col items-center gap-10 text-center">
+            <h2 className="max-w-[12ch] text-[50px] font-medium leading-[58px] tracking-[0em]">
+              Scopri gli immobili in vendita
+            </h2>
+            <PillButton>tutti gli immobili</PillButton>
+          </div>
+        </div>
+      </section>
+
+      <footer className="overflow-hidden px-[30px] pb-0 pt-20 lg:pt-28">
+        <div className="w-full">
+          <div className="grid gap-12 lg:grid-cols-[1.3fr_0.6fr_0.45fr]">
+            <p
+              className="max-w-[42rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]"
+              style={{ textIndent: "6.2rem" }}
+            >
+              Che tu stia pensando di vendere, acquistare o semplicemente valutando le possibilita
+              che hai davanti, affrontare il mondo immobiliare puo generare dubbi e incertezze.
+              Immobilei nasce proprio per questo: aiutarti a fare chiarezza, analizzare la
+              situazione e individuare il percorso piu adatto alle tue esigenze. Un confronto
+              diretto puo essere il primo passo per trasformare una domanda in una decisione
+              consapevole. Contattaci e raccontaci la tua situazione.
+            </p>
+
+            <div className="space-y-6 text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]">
+              <p>
+                Piazza Carlo Felice 30,
+                <br />
+                Torino 10123
+              </p>
+              <p>+39 000 000 0000</p>
+              <p>info@immobilei.com</p>
+            </div>
+
+            <div className="space-y-6 text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]">
+              <p>Instagram</p>
+              <p>TikTok</p>
+              <p>Youtube</p>
+            </div>
+          </div>
+
+          <div className="mt-10 pt-6">
+            <img
+              src="/logos/Logo.svg"
+              alt="ImmobiLei"
+              className="h-auto w-full -translate-y-[15px]"
+            />
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 }
