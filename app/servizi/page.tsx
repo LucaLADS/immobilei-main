@@ -17,15 +17,15 @@ const sectionTitleClassName =
   "text-[50px] font-medium leading-[58px] tracking-[0em] text-[#111111]";
 
 const featureLinks = [
-  { label: "Percorsi", bgClassName: "bg-[#B5522D]", textClassName: "text-[var(--foreground)]", href: "/immobili", labelWeightClassName: "font-medium" },
-  { label: "Servizi", bgClassName: "bg-[#C46A42]", textClassName: "text-[var(--foreground)]", href: "/servizi" },
+  { label: "Percorsi", bgClassName: "bg-[#4d1b11]", textClassName: "text-white", href: "/immobili", labelWeightClassName: "font-medium" },
+  { label: "Servizi", bgClassName: "bg-[#c04131]", textClassName: "text-white", href: "/servizi" },
   {
     label: "Formazione",
-    bgClassName: "bg-[#A98A6E]",
+    bgClassName: "bg-[#c9dbe8]",
     textClassName: "text-[var(--foreground)]",
     href: "/formazione",
   },
-  { label: "Contatti", bgClassName: "bg-[#D8C4AD]", textClassName: "text-[var(--foreground)]" },
+  { label: "Contatti", bgClassName: "bg-[#eae3dc]", textClassName: "text-[var(--foreground)]" },
 ];
 
 const HERO_RIBBON_HEIGHT = 188;
