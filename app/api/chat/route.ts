@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { getOpenAIClient } from "@/lib/openai";
 import { IMMOBILEI_PROMPT } from "@/prompt/immobileiPrompt";
 
 export async function POST(req: NextRequest) {
@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const openai = getOpenAIClient();
 
     const response = await openai.responses.create({
       model: "gpt-4o-mini",
