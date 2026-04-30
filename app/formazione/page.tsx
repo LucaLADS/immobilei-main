@@ -9,20 +9,23 @@ import {
   HERO_HEADER_CLASS,
   HERO_SECTION_CLASS,
 } from "@/lib/hero-layout";
+import { FadeInUp, Stagger, StaggerItem } from "@/components/animations";
+import { useUltraPremiumTextReveal } from "@/lib/text-reveal";
+import { gsap } from "@/src/lib/gsapConfig";
 
 const sectionTitleClassName =
   "text-[50px] font-medium leading-[58px] tracking-[0em] text-[#111111]";
 
 const featureLinks = [
-  { label: "Immobili", bgClassName: "bg-[#e48fb0]", textClassName: "text-[#161616]" },
-  { label: "Servizi", bgClassName: "bg-[#3c3fa4]", textClassName: "text-white", href: "/servizi" },
+  { label: "Percorsi", bgClassName: "bg-[#B5522D]", textClassName: "text-[var(--foreground)]", href: "/immobili", labelWeightClassName: "font-medium" },
+  { label: "Servizi", bgClassName: "bg-[#C46A42]", textClassName: "text-[var(--foreground)]", href: "/servizi" },
   {
     label: "Formazione",
-    bgClassName: "bg-[#a8c3cf]",
-    textClassName: "text-[#161616]",
+    bgClassName: "bg-[#A98A6E]",
+    textClassName: "text-[var(--foreground)]",
     href: "/formazione",
   },
-  { label: "Contatti", bgClassName: "bg-[#e8e3c7]", textClassName: "text-[#161616]" },
+  { label: "Contatti", bgClassName: "bg-[#D8C4AD]", textClassName: "text-[var(--foreground)]" },
 ];
 
 const HERO_RIBBON_HEIGHT = 188;
@@ -121,15 +124,15 @@ function PillButton({
 }) {
   const toneClassName =
     tone === "dark"
-      ? "bg-[#19191d] text-white"
+      ? "btn-pill-primary"
       : tone === "tinted"
-        ? "bg-[#b7cfd9] text-[#161616] ring-1 ring-[#161616]"
-        : "bg-transparent text-[#161616] ring-1 ring-[#161616]";
+        ? "btn-pill-accent"
+        : "btn-pill-outline";
 
   return (
     <button
       type="button"
-      className={`inline-flex min-h-12 items-center justify-center rounded-full px-7 text-[1.1rem] font-medium tracking-[-0.03em] ${toneClassName}`}
+      className={`btn-pill ${toneClassName}`}
     >
       {children}
     </button>
@@ -153,8 +156,8 @@ function ArrowMark({ light = false, left = false }: { light?: boolean; left?: bo
 
 function PlaceholderVisual({ className = "" }: { className?: string }) {
   return (
-    <div className={`relative overflow-hidden rounded-[14px] bg-[#d1d1d1] ${className}`}>
-      <div className="absolute inset-0 bg-[linear-gradient(140deg,transparent_49.7%,#4c4c4c_50%,transparent_50.3%)]" />
+    <div className={`img-zoom relative overflow-hidden rounded-[14px] bg-[#d1d1d1] ${className}`}>
+      <div className="img-zoom-inner absolute inset-0 bg-[linear-gradient(140deg,transparent_49.7%,#4c4c4c_50%,transparent_50.3%)]" />
     </div>
   );
 }
@@ -185,7 +188,7 @@ function FeatureRibbon({ progress }: { progress: number }) {
               />
               <div className="relative z-10 h-full">
                 <div className="flex h-full items-center px-8">
-                  <span className="pointer-events-none text-[30px] font-semibold leading-[28px] tracking-[0em] opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
+                  <span className={`pointer-events-none text-[30px] ${item.labelWeightClassName ?? "font-medium"} leading-[28px] tracking-[0em] opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100`}>
                     {item.label}
                   </span>
                 </div>
@@ -197,7 +200,7 @@ function FeatureRibbon({ progress }: { progress: number }) {
               style={{ gap: `${50 - progress * 30}px` }}
             >
               <h2
-                className="text-[30px] font-semibold leading-[28px] tracking-[0em] transition-opacity duration-200 ease-out"
+                className={`text-[30px] ${item.labelWeightClassName ?? "font-medium"} leading-[28px] tracking-[0em] transition-opacity duration-200 ease-out`}
                 style={{
                   opacity: textOpacity,
                   transform: `translateY(${labelTranslate}px)`,
@@ -229,14 +232,17 @@ function AudienceCard({
   description: string;
 }) {
   return (
-    <article className="flex min-h-[24rem] flex-col rounded-[16px] border border-[#676767] px-8 py-7">
+    <article
+      className="training-audience-card flex min-h-[24rem] flex-col rounded-[16px] border border-[#676767] px-8 py-7"
+      style={{ willChange: "transform, opacity" }}
+    >
       <div className="grid grid-cols-[4.5rem_1px_minmax(0,1fr)] items-center gap-x-6">
         <div className="text-[16px] font-bold leading-normal tracking-[0em] text-[#161616]">{index}</div>
         <div className="h-[64px] w-px bg-[#8a8a8a]" />
-        <h3 className="text-[22px] font-normal leading-[1.05] tracking-[0em] text-[#151515]">{title}</h3>
+        <h3 data-no-reveal className="text-[22px] font-normal leading-[1.05] tracking-[0em] text-[#151515]">{title}</h3>
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <p className="max-w-[30rem] text-center text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]">
+        <p data-no-reveal className="max-w-[30rem] text-center text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]">
           {description}
         </p>
       </div>
@@ -254,14 +260,17 @@ function CourseCard({
   description: string;
 }) {
   return (
-    <article className="flex min-h-[22rem] flex-col rounded-[16px] border border-[#676767] px-8 py-7">
+    <article
+      className="training-course-card flex min-h-[22rem] flex-col rounded-[16px] border border-[#676767] px-8 py-7"
+      style={{ willChange: "transform, opacity" }}
+    >
       <div className="grid grid-cols-[4.5rem_1px_minmax(0,1fr)] items-center gap-x-6">
         <div className="text-[16px] font-bold leading-normal tracking-[0em] text-[#161616]">{index}</div>
         <div className="h-[64px] w-px bg-[#8a8a8a]" />
-        <h3 className="text-[22px] font-normal leading-[1.05] tracking-[0em] text-[#151515]">{title}</h3>
+        <h3 data-no-reveal className="text-[22px] font-normal leading-[1.05] tracking-[0em] text-[#151515]">{title}</h3>
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <p className="max-w-[30rem] text-center text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]">
+        <p data-no-reveal className="max-w-[30rem] text-center text-[16px] font-normal leading-[22px] tracking-[0em] text-[#1c1c1c]">
           {description}
         </p>
       </div>
@@ -273,6 +282,12 @@ export default function FormazionePage() {
   const [scrollY, setScrollY] = useState(0);
   const [openFindingIndex, setOpenFindingIndex] = useState(-1);
   const coursesCarouselRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement | null>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const heroSubtitleRef = useRef<HTMLParagraphElement | null>(null);
+  const heroCtaRef = useRef<HTMLDivElement | null>(null);
+  const audienceCardsSectionRef = useRef<HTMLElement | null>(null);
+  const coursesCardsSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -286,6 +301,160 @@ export default function FormazionePage() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+      });
+
+      tl.from(heroTitleRef.current, {
+        y: 36,
+        opacity: 0,
+        duration: 0.9,
+      })
+        .from(
+          heroSubtitleRef.current,
+          {
+            y: 30,
+            opacity: 0,
+            duration: 0.82,
+            ease: "power2.out",
+          },
+          "-=0.55",
+        )
+        .from(
+          heroCtaRef.current,
+          {
+            opacity: 0,
+            scale: 0.97,
+            duration: 0.72,
+            ease: "power2.out",
+          },
+          "-=0.42",
+        );
+    }, heroRef);
+
+    return () => {
+      ctx.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    let mm: ReturnType<typeof gsap.matchMedia> | null = null;
+
+    const ctx = gsap.context(() => {
+      mm = gsap.matchMedia();
+
+      const audienceCards = gsap.utils.toArray<HTMLElement>(".training-audience-card");
+      const courseCardWraps = gsap.utils.toArray<HTMLElement>(".training-course-card-wrap");
+
+      if (audienceCardsSectionRef.current && audienceCards.length) {
+        mm?.add("(min-width: 1280px)", () => {
+          const centerIndex = (audienceCards.length - 1) / 2;
+
+          gsap.fromTo(
+            audienceCards,
+            {
+              x: (index) => (centerIndex - index) * 112,
+              y: (index) => (index === centerIndex ? 8 : 18),
+              scale: (index) => (index === centerIndex ? 1 : 0.992),
+              autoAlpha: 0,
+              zIndex: (index) => (index === centerIndex ? 3 : 2),
+              willChange: "transform, opacity",
+              force3D: true,
+            },
+            {
+              x: 0,
+              y: 0,
+              scale: 1,
+              autoAlpha: 1,
+              duration: 1.08,
+              ease: "power3.out",
+              stagger: {
+                each: 0.145,
+                from: "center",
+              },
+              clearProps: "transform,opacity,willChange,zIndex",
+              overwrite: "auto",
+              scrollTrigger: {
+                trigger: audienceCardsSectionRef.current,
+                start: "top 90%",
+                toggleActions: "play none none none",
+                once: true,
+              },
+            },
+          );
+        });
+
+        mm?.add("(max-width: 1279px)", () => {
+          gsap.fromTo(
+            audienceCards,
+            {
+              y: 24,
+              autoAlpha: 0,
+              willChange: "transform, opacity",
+              force3D: true,
+            },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.96,
+              ease: "power2.out",
+              stagger: 0.12,
+              clearProps: "transform,opacity,willChange",
+              overwrite: "auto",
+              scrollTrigger: {
+                trigger: audienceCardsSectionRef.current,
+                start: "top 90%",
+                toggleActions: "play none none none",
+                once: true,
+              },
+            },
+          );
+        });
+      }
+
+      if (coursesCardsSectionRef.current && courseCardWraps.length) {
+        gsap.fromTo(
+          courseCardWraps,
+          {
+            y: 22,
+            autoAlpha: 0,
+            willChange: "transform, opacity",
+            force3D: true,
+          },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.92,
+            ease: "power2.out",
+            stagger: 0.1,
+            clearProps: "transform,opacity,willChange",
+            overwrite: "auto",
+            scrollTrigger: {
+              trigger: coursesCardsSectionRef.current,
+              start: "top 90%",
+              toggleActions: "play none none none",
+              once: true,
+            },
+          },
+        );
+      }
+    });
+
+    return () => {
+      mm?.revert();
+      ctx.revert();
+    };
+  }, []);
+  useUltraPremiumTextReveal();
 
   const ribbonProgress = Math.min(scrollY / RIBBON_SCROLL_RANGE, 1);
   const ribbonHeight =
@@ -307,59 +476,63 @@ export default function FormazionePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f2f2f0] text-[#161616]">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="fixed bottom-0 left-0 right-0 z-40">
         <div className="w-screen overflow-visible" style={{ height: `${ribbonHeight}px` }}>
           <FeatureRibbon progress={ribbonProgress} />
         </div>
       </div>
 
-      <section className={HERO_SECTION_CLASS}>
+      <section ref={heroRef} className={HERO_SECTION_CLASS}>
         <div className={HERO_FRAME_CLASS}>
           <header className={HERO_HEADER_CLASS}>
             <Link href="/" className="block">
               <img
-                src="/logos/logo%20%2B%20sub.svg"
+                src="/logos/logo_new_immobilei.svg?v=2"
                 alt="ImmobiLei"
-                className="h-auto w-[15rem] sm:w-[18rem]"
+                className="h-auto w-[16.5rem] sm:w-[19.8rem]"
               />
             </Link>
             <div className="flex items-center gap-3">
               <PillButton tone="light">Prenota una consulenza</PillButton>
               <button
                 type="button"
-                className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[#b7cfd9] px-7 text-[1.1rem] font-medium tracking-[-0.03em] text-[#161616] ring-1 ring-[#161616]"
+                className="btn-pill btn-pill-accent"
               >
                 Menu
                 <span className="flex flex-col gap-[3px]">
-                  <span className="h-[1.5px] w-4 bg-[#161616]" />
-                  <span className="h-[1.5px] w-4 bg-[#161616]" />
+                  <span className="h-[1.5px] w-4 bg-current" />
+                  <span className="h-[1.5px] w-4 bg-current" />
                 </span>
               </button>
             </div>
           </header>
 
-          <div className={HERO_CONTENT_CLASS}>
-            <h1 className={`${HERO_H1_BASE_CLASS}`}>
+          <FadeInUp className={HERO_CONTENT_CLASS}>
+            <h1 ref={heroTitleRef} data-no-reveal className={`${HERO_H1_BASE_CLASS}`}>
               <span className="block whitespace-nowrap">Formazione immobiliare</span>
               <span className="block whitespace-nowrap">che nasce dal lavoro reale</span>
             </h1>
-            <p className="mt-8 max-w-[56rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#191919]">
+            <p
+              ref={heroSubtitleRef}
+              data-no-reveal
+              className="mt-8 max-w-[56rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#191919]"
+            >
               Percorsi pensati per agenti immobiliari che vogliono rafforzare competenze, metodo e
               consapevolezza professionale attraverso contenuti pratici, aggiornati e direttamente
               legati all&apos;esperienza sul campo.
             </p>
-            <div className="mt-10">
+            <div ref={heroCtaRef} className="mt-10">
               <PillButton>richiedi informazioni</PillButton>
             </div>
-          </div>
+          </FadeInUp>
 
           <div className="shrink-0" style={{ height: `${ribbonHeight}px` }} />
         </div>
       </section>
 
       <section className="px-[30px] py-20 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-[11rem_minmax(34rem,1fr)_minmax(28rem,1fr)] xl:gap-16">
+        <FadeInUp className="grid gap-12 lg:grid-cols-[11rem_minmax(34rem,1fr)_minmax(28rem,1fr)] xl:gap-16">
           <SectionEyebrow>introduzione</SectionEyebrow>
           <div className="space-y-10">
             <h2 className={`max-w-[12ch] ${sectionTitleClassName}`}>
@@ -378,11 +551,11 @@ export default function FormazionePage() {
             </p>
           </div>
           <PlaceholderVisual className="aspect-[0.84/1] w-full max-w-[36rem] justify-self-end" />
-        </div>
+        </FadeInUp>
       </section>
 
-      <section className="px-[30px] py-20 lg:py-28">
-        <div className="space-y-14">
+      <section ref={audienceCardsSectionRef} className="px-[30px] py-20 lg:py-28">
+        <FadeInUp className="space-y-14">
           <div className="grid gap-14 lg:grid-cols-[15rem_minmax(0,1fr)]">
             <SectionEyebrow>per chi</SectionEyebrow>
             <h2 className={`max-w-[15ch] ${sectionTitleClassName}`}>
@@ -390,15 +563,17 @@ export default function FormazionePage() {
               <span className="block whitespace-nowrap">parte da un bisogno diverso</span>
             </h2>
           </div>
-          <div className="grid gap-5 xl:grid-cols-3">
+          <Stagger className="grid gap-5 xl:grid-cols-3" delay={0.1}>
             {audienceCards.map((card) => (
-              <AudienceCard key={card.title} {...card} />
+              <StaggerItem key={card.title}>
+                <AudienceCard {...card} />
+              </StaggerItem>
             ))}
-          </div>
-        </div>
+          </Stagger>
+        </FadeInUp>
       </section>
 
-      <section className="px-[30px] py-20 lg:py-28">
+      <section ref={coursesCardsSectionRef} className="px-[30px] py-20 lg:py-28">
         <div className="space-y-16">
           <div className="grid gap-12 lg:grid-cols-[13rem_minmax(0,1fr)]">
             <SectionEyebrow>cosa trovi</SectionEyebrow>
@@ -461,11 +636,13 @@ export default function FormazionePage() {
       </section>
 
       <section className="px-[30px] py-16 lg:py-24">
-        <PlaceholderVisual className="aspect-[1.8/1] w-full" />
+        <FadeInUp>
+          <PlaceholderVisual className="aspect-[1.8/1] w-full" />
+        </FadeInUp>
       </section>
 
       <section className="px-[30px] py-20 lg:py-28">
-        <div className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
+        <FadeInUp className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
           <SectionEyebrow>perche nasce Immobilei Academy</SectionEyebrow>
           <div className="w-full space-y-12">
             <p
@@ -488,11 +665,11 @@ export default function FormazionePage() {
               consapevole e piu strutturato.
             </p>
           </div>
-        </div>
+        </FadeInUp>
       </section>
 
       <section className="px-[30px] py-20 lg:py-28">
-        <div className="space-y-14">
+        <FadeInUp className="space-y-14">
           <div className="grid gap-14 lg:grid-cols-[15rem_minmax(0,1fr)]">
             <SectionEyebrow>corsi</SectionEyebrow>
             <h2 className={`max-w-[8ch] ${sectionTitleClassName}`}>
@@ -505,7 +682,7 @@ export default function FormazionePage() {
             className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {highlightedCourses.map((course) => (
-              <div key={course.title} data-course-card className="w-full min-w-[30rem] snap-start">
+              <div key={course.title} data-course-card className="training-course-card-wrap w-full min-w-[30rem] snap-start">
                 <CourseCard {...course} />
               </div>
             ))}
@@ -526,11 +703,11 @@ export default function FormazionePage() {
               <ArrowMark />
             </button>
           </div>
-        </div>
+        </FadeInUp>
       </section>
 
       <section className="px-[30px] py-24 lg:py-32">
-        <div className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
+        <FadeInUp className="grid w-full gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
           <SectionEyebrow>percorsi formativi</SectionEyebrow>
           <div className="w-full space-y-10">
             <p
@@ -543,11 +720,11 @@ export default function FormazionePage() {
             </p>
             <PillButton>richiedi un incontro</PillButton>
           </div>
-        </div>
+        </FadeInUp>
       </section>
 
       <footer className="overflow-hidden px-[30px] pb-0 pt-20 lg:pt-28">
-        <div className="w-full">
+        <FadeInUp className="w-full" amount={0.1}>
           <div className="grid gap-12 lg:grid-cols-[1.3fr_0.6fr_0.45fr]">
             <p
               className="max-w-[42rem] text-[16px] font-normal leading-[22px] tracking-[0em] text-[#161616]"
@@ -580,12 +757,12 @@ export default function FormazionePage() {
 
           <div className="mt-10 pt-6">
             <img
-              src="/logos/Logo.svg"
+              src="/logos/logo_new_immobilei.svg?v=2"
               alt="ImmobiLei"
               className="h-auto w-full -translate-y-[15px]"
             />
           </div>
-        </div>
+        </FadeInUp>
       </footer>
     </main>
   );
